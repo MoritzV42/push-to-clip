@@ -34,7 +34,19 @@ Python (stdlib-only) tool, installable from PyPI. Please:
    Expect `{"ok": true, "chars": ..., "source": "stdin"}`. Then tell me to press
    paste (Ctrl/Cmd-V) somewhere to confirm the text is on my clipboard.
 
-5. **Show me the basics** once it works:
+5. **Windows only — verify the desktop toast.** The toast notification configures
+   itself on first use (the bundled `toast.ps1` registers its AppUserModelId under
+   HKCU — idempotent, no admin rights, no manual steps). Just run:
+   ```bash
+   push-to-clip "toast check"
+   ```
+   and ask me whether a toast banner appeared bottom right. If I say no, I most
+   likely have **Do Not Disturb** on: run `push-to-clip --urgent "toast check"`
+   instead and tell me to click **Allow** if Windows asks about important
+   notifications — after that one-time prompt, urgent toasts break through
+   Do Not Disturb permanently.
+
+6. **Show me the basics** once it works:
    - `push-to-clip "text"` — copy a string
    - `cmd | push-to-clip` — copy piped output
    - `push-to-clip --file path` — copy a file

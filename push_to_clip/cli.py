@@ -27,6 +27,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("-f", "--file", help="Copy the contents of this file.")
     parser.add_argument("-n", "--no-toast", action="store_true",
                         help="Do not show a desktop toast.")
+    parser.add_argument("-u", "--urgent", action="store_true",
+                        help="Windows 11: mark the toast as an important notification "
+                             "so it breaks through Do Not Disturb (one-time 'Allow' "
+                             "prompt on first use).")
     parser.add_argument("-q", "--quiet", action="store_true",
                         help="Suppress the stdout confirmation.")
     parser.add_argument("--json", action="store_true",
@@ -66,7 +70,10 @@ def main(argv=None) -> int:
 
     chars = len(content)
     if not args.no_toast:
-        notify("push-to-clip", f"Copied {chars} characters to your clipboard")
+        # Window header already shows "push-to-clip" (registered DisplayName),
+        # so the title carries the actual news.
+        notify("Copied to clipboard", f"{chars} characters — ready to paste",
+               urgent=args.urgent)
     if args.json:
         print(json.dumps({"ok": True, "chars": chars, "source": source}))
     elif not args.quiet:

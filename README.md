@@ -52,6 +52,7 @@ On **Linux**, install one clipboard backend once: `wl-clipboard` (Wayland), `xcl
 | `… \| ptc -q` | Short alias, no stdout confirmation |
 | `… \| push-to-clip --json` | `{"ok": true, "chars": N, "source": "stdin"}` |
 | `push-to-clip -n …` | Skip the desktop toast |
+| `push-to-clip -u …` | Windows 11: urgent toast that breaks through Do Not Disturb |
 
 Exit code is `0` on success, `1` if the clipboard could not be written (with a clear reason).
 
@@ -62,6 +63,58 @@ Exit code is `0` on success, `1` if the clipboard could not be written (with a c
 - **Linux** — tries `wl-copy`, then `xclip`, then `xsel`.
 
 No network, no telemetry, nothing leaves your machine.
+
+## Desktop toast
+
+After every successful copy, push-to-clip shows a small desktop notification —
+so you get visual feedback even when the copy was triggered by a background
+script or an AI agent you weren't watching:
+
+![Windows toast after a copy](docs/toast-windows.png)
+
+- **Windows** — native toast via the bundled `toast.ps1` (Windows PowerShell 5.1 + WinRT).
+  The script **self-registers** its AppUserModelId under HKCU on every run
+  (idempotent, no admin rights) — without a registered AppId, Windows silently
+  drops toast banners. Nothing to set up: the first toast just works.
+- **macOS** — `osascript` notification.
+- **Linux** — `notify-send`, if present.
+
+The toast is always best-effort: if no notifier is available, the copy still
+succeeds. Skip it with `-n` / `--no-toast`.
+
+### Breaking through Do Not Disturb (Windows 11)
+
+While **Do Not Disturb** (or Focus Assist) is on, Windows routes regular toasts
+silently into the Notification Center — you never see a banner. Pass
+`-u` / `--urgent` to send the toast as an *important notification*
+(`scenario="urgent"`): Windows asks once ("Allow important notifications from
+push-to-clip?"), and from then on urgent toasts stay visible even during
+Do Not Disturb.
+
+### Standalone use & routing line
+
+The bundled script also works on its own, e.g. from agent workflows that want
+to tell you *where* clipboard content came from and *what it is for*:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File <site-packages>\push_to_clip\toast.ps1 `
+  -Title "Copied to clipboard" -Message "Start prompt, 4.6 KB" `
+  -Source "Manager chat" -Target "Worker chat" -Urgent
+```
+
+`-Source`/`-Target` render as a third line: `From: Manager chat → For: Worker chat`.
+The same options are available programmatically via
+`push_to_clip.toast.notify(title, message, source=…, target=…, urgent=…)`.
+
+## Troubleshooting
+
+| Symptom | Cause & fix |
+|---|---|
+| No toast banner on Windows, but copies work | **Do Not Disturb / Focus Assist is on** — banners are silently sent to the Notification Center. Use `--urgent` (one-time "Allow" prompt) or turn off Do Not Disturb. |
+| No toast at all on Windows | The toast needs **Windows PowerShell 5.1** (`powershell.exe`). PowerShell 7 (`pwsh`) lacks the WinRT projection — push-to-clip always calls `powershell.exe` for you, but if you invoke `toast.ps1` manually, don't use `pwsh`. |
+| Garbled umlauts/emoji when editing `toast.ps1` | The file must stay **UTF-8 with BOM** — PowerShell 5.1 misreads BOM-less UTF-8 as ANSI. |
+| No toast on Linux | Install `libnotify` (`notify-send`); the toast is optional by design. |
 
 <!-- PORTFOLIO-LINKS:START -->
 ## More open-source tools by Moritz Voigt
