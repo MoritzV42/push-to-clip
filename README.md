@@ -1,10 +1,13 @@
 # push-to-clip
 
-**Copy text, files, or piped output to your system clipboard — from one command, on any OS.**
+Your agent, script, or remote session just produced something you want to paste
+somewhere else — now what? `clip.exe` on Windows, `pbcopy` on macOS, `xclip` or
+`wl-copy` on Linux (if it's even installed), each with its own encoding quirks —
+and none of them tell you whether the copy actually happened.
 
-`push-to-clip` is a tiny, dependency-free CLI that writes whatever you give it to the
-system clipboard. Pipe a command's output, pass a string, or point it at a file — it
-lands on your clipboard on **Windows, macOS, and Linux**, with an optional desktop toast.
+`push-to-clip` is one tiny, dependency-free command that puts text, files, or piped
+output onto your system clipboard on **Windows, macOS, and Linux** — with an optional
+desktop toast so you know it worked.
 
 It's the natural companion to [secret-paste](https://github.com/MoritzV42/secret-paste):
 where *secret-paste* gets values **into** your AI coding agent without leaking them to the
